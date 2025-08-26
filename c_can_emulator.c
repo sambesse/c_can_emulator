@@ -1,4 +1,5 @@
 #include <bits/pthreadtypes.h>
+#include <bits/types/struct_itimerspec.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <signal.h>
@@ -32,10 +33,12 @@ struct signal_desc {
     uint16_t offset;
     float scalar;
     char *name;
+    uint8_t data;
+    uint8_t data_len;
 };
 
 struct message_desc {
-    uint16_t periodicty;
+    uint16_t periodicity;
     uint16_t length;
     uint16_t id;
     int can_interface;
@@ -43,9 +46,10 @@ struct message_desc {
     uint16_t num_signals;
     struct signal_desc *signals;
     uint8_t *data;
-    timer_t *timer;
     pthread_mutex_t *lock;
 };
+
+
 
 int main(int argc, char **argv) {
     
@@ -57,3 +61,4 @@ void send_message(union sigval s) {
     send(dsc->can_interface, dsc->data, dsc->length, 0);
     pthread_mutex_unlock(dsc->lock);
 }
+
