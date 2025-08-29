@@ -39,6 +39,18 @@
  *  
  *  */
 
+enum keywords {
+    //single char symbols
+    BAR, PLUS, AT, LEFT_PARANTHESIS, RIGHT_PARANTHESIS, 
+    LEFT_BRACKET, RIGHT_BRACKET, COLON,
+
+    //Strings
+    STRING_LITERAL, LABEL,
+
+    //Numbers
+    INTEGER, DOUBLE,
+};
+
 typedef struct signal_desc {
     uint16_t starting_bit;
     uint16_t length;
@@ -141,6 +153,7 @@ int lexer(char *line, uint32_t line_size) {
     int i = 0;
     vec_t lexeme_vec;
     vec_init(&lexeme_vec, sizeof(lexeme_t), 10, 5);
+    lexeme_t next_lexeme;
     while (i < line_size) {
         switch(line[i]) {
             case ' ':
@@ -148,7 +161,8 @@ int lexer(char *line, uint32_t line_size) {
             case '\t':
                 break;
             case '|':
-                
+                next_lexeme.token = "|";
+                next_lexeme.type = 
         }
         i++;
     }
