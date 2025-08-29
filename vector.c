@@ -3,13 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct vector {
-    void *data;
-    uint32_t elem_size;
-    uint32_t size;
-    uint32_t capacity;
-    uint32_t max_inc;
-} vec_t;
+#include "vector.h"
 
 int vec_init(vec_t *vec, uint32_t element_size, uint32_t init_cap, uint32_t max_increment) {
     vec->data = malloc(element_size * init_cap);

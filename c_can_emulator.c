@@ -7,6 +7,8 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -15,7 +17,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-#include "cJSON.h"
+#include "vector.h"
 /* general plan: 
  *  read message descriptors from a json file. Each message descriptor should have 
  *      a periodicity, or 0 if only on change
@@ -37,7 +39,7 @@
  *  
  *  */
 
-struct signal_desc {
+typedef struct signal_desc {
     uint16_t starting_bit;
     uint16_t length;
     uint16_t offset;
@@ -45,9 +47,9 @@ struct signal_desc {
     char *name;
     uint8_t data;
     uint8_t data_len;
-};
+} signal_desc_t;
 
-struct message_desc {
+typedef struct message_desc {
     uint16_t periodicity;
     uint16_t length;
     uint16_t id;
@@ -57,7 +59,18 @@ struct message_desc {
     struct signal_desc *signals;
     uint8_t *data;
     pthread_mutex_t *lock;
-};
+} message_desc_t;
+
+typedef struct dbc_parse_line {
+    char *line;
+    uint32_t size;
+    uint32_t index;
+} dbc_line_t;
+
+typedef struct lexeme {
+    char *token;
+    int type;
+} lexeme_t;
 
 int can_fds[4];
 void init_interfaces(int *fds);
@@ -72,7 +85,7 @@ int main(int argc, char **argv) {
 }
 
 void send_message(union sigval s) {
-    struct message_desc *dsc = s.sival_ptr;
+    message_desc_t *dsc = s.sival_ptr;
     pthread_mutex_lock(dsc->lock);
     send(dsc->can_interface, dsc->data, dsc->length, 0);
     pthread_mutex_unlock(dsc->lock);
@@ -101,6 +114,44 @@ void init_interfaces(int *fds) {
     }
 }
 
-int parse_can_json(char *filename) {
-    
+int parse_dbc(char *file_name) {
+    int dbc_fd = open(file_name, O_RDONLY);
+    if (dbc_fd < 0) {
+        printf("failed to open file: %s\n", file_name);
+        return -1;
+    }
+    char c = EOF;
+    uint32_t end_line = 0;
+    char line_buf[256];
+    do {
+        if (read(dbc_fd, &c, 1) < 0) {
+            perror("failed to read from dbc fd");
+            return -1;
+        }
+        if (c == '\n') {
+            // determine the line type and then either start a new message parsing
+        } else {
+            line_buf[end_line] = c;
+            end_line++;
+        }
+    } while(c != EOF);
 }
+
+int lexer(char *line, uint32_t line_size) {
+    int i = 0;
+    vec_t lexeme_vec;
+    vec_init(&lexeme_vec, sizeof(lexeme_t), 10, 5);
+    while (i < line_size) {
+        switch(line[i]) {
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            case '|':
+                
+        }
+        i++;
+    }
+}
+
+
